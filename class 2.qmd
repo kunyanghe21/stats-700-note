@@ -1,0 +1,98 @@
+---
+title: "Reading Notes on Kingman (1982) — *The Coalescent*"
+subtitle: "Theorem 1 and the first four pages (pp. 235–238)"
+author: ""
+format:
+  html:
+    toc: true
+    number-sections: true
+    toc-depth: 3
+lang: en
+fontsize: 11pt
+---
+
+> J. F. C. Kingman (1982), “The Coalescent,” *Stochastic Processes and their Applications* 13:235–248.  
+> Focus: Theorem 1 and pp. 235–238.
+
+## 0. Overview
+
+- **Object.** The $n$-coalescent is a **continuous-time Markov chain (CTMC)** on partitions of $\{1,\dots,n\}$. From a partition with $k$ blocks, one merge occurs at total rate $d_k=\binom{k}{2}$.
+- **Theorem 1 (core).** The process decomposes into two **independent** parts:
+  1) a **pure death process** $D_t$ on $\{1,\dots,n\}$ with death rate $d_k=\binom{k}{2}$ from $k\to k-1$;
+  2) a **jump chain** $(\mathcal S_k)_{k=n,\dots,1}$ that, at level $k$, picks uniformly among the $\binom{k}{2}$ possible merges.  
+  The state at time $t$ is
+  \[
+  R_t=\mathcal S_{D_t}.
+  \]
+  For a level-$k$ partition $\xi$ with block sizes $(A_1,\dots,A_k)$,
+  \[
+  \Pr(\mathcal S_k=\xi)=\frac{(n-k)!\,k!\,(k-1)!}{n!\,(n-1)!}\prod_{i=1}^k A_i!.
+  \]
+- **Immediate payoff.** Probability at time $t$ **factorizes**:
+  \[
+  \Pr(R_t=\xi)=\Pr(D_t=k)\cdot \Pr(\mathcal S_k=\xi).
+  \]
+
+---
+
+## 1. Key definition
+
+### 1.1 Continuous-time Markov chain (CTMC)
+A process $\{X_t\}$ on state space $S$ with generator $Q=(q_{ij})$:
+- holding time in $i$ is $\mathrm{Exp}(-q_{ii})$;
+- upon leaving $i$, next state is $j$ with prob.\ $q_{ij}/(-q_{ii})$.
+
+In the $n$-coalescent, if there are $k$ blocks, the holding time is $\mathrm{Exp}(\binom{k}{2})$.
+
+### 1.2 Jump chain
+The **discrete-time** chain of post-jump states:
+\[
+\Pr\{Y_{m+1}=j\mid Y_m=i\}=\frac{q_{ij}}{-q_{ii}}.
+\]
+For the coalescent at level $k$, each pairwise merge has probability $1/\binom{k}{2}$.
+
+---
+
+## 2. Theorem 1
+
+- **Statement.** $R_t=\mathcal S_{D_t}$, with $D_t$ (pure death) and $(\mathcal S_k)$ (uniform merge jump chain) **independent**.
+- **Consequences.**
+  - **Absorption time** (MRCA time):
+    \[
+    T=\sum_{k=2}^n \tau_k,\qquad \tau_k\sim \mathrm{Exp}\!\left(\binom{k}{2}\right)\ \text{i.i.d.}
+    \]
+  - **Snapshot at time $t$**:
+    \[
+    \Pr(R_t=\xi)=\Pr(D_t=k)\cdot \Pr(\mathcal S_k=\xi).
+    \]
+  - **Computational simplicity.** Time (exponentials) and structure (uniform merge over partitions) are decoupled.
+
+---
+
+## 3. Micro-example ($n=4$)
+
+- Level $4\to3$: $\binom{4}{2}=6$ possible merges, each prob.\ $1/6$.  
+- Level $3\to2$: $\binom{3}{2}=3$ possible merges, each prob.\ $1/3$.
+
+At $k=2$, two shapes:
+- $(3,1)$: total probability $2/3$ (four labeled partitions, each $1/6$).
+- $(2,2)$: total probability $1/3$ (three labeled partitions, each $1/9$).
+
+This matches counting under uniform merges and the formula for $\Pr(\mathcal S_2=\xi)$.
+
+---
+
+## 4. Quick answers to the prompt
+
+### 4.1 What is a CTMC? What is its jump chain?
+- **CTMC:** continuous-time Markov process with exponential holding times governed by generator $Q$; next state on a jump is chosen with probability proportional to the outgoing rates.  
+- **Jump chain:** the embedded discrete-time chain recording the sequence of states after each jump. In the coalescent, at level $k$, it is **uniform over pairs**.
+
+### 4.2 Why is this paper a major contribution?
+1. **Clean mathematical model of genealogies.** Genealogical “coalescing backward in time” becomes a transparent CTMC on partitions with explicit rates $d_k=\binom{k}{2}$.
+2. **Theorem 1’s factorization.** Separates **time** (pure death) from **structure** (uniform merges), turning many problems into elementary computations.
+3. **Consistency and extensibility.** The framework scales across sample sizes and connects naturally to exchangeable random partitions (via paintbox), fueling a broad theory and many applications.
+
+---
+
+

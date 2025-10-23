@@ -1,0 +1,134 @@
+---
+title: "Class 4: Sampling-through-time in birth–death trees"
+author: "Kunyang He"
+date: today
+format:
+  html:
+    toc: true
+    number-sections: false
+    html-math-method: mathjax
+    mathjax:
+      macros:
+        "\\lam": "\\lambda"
+        "\\muD": "\\mu"
+        "\\cRate": "c"
+        "\\rhoS": "\\rho"
+        "\\tmrca": "{t_{\\mathrm{mrca}}}"
+        "\\torig": "{t_{\\mathrm{or}}}"
+  pdf:
+    documentclass: article
+    geometry: "margin=1in"
+    include-in-header:
+      text: |
+        \usepackage{amsmath,amssymb,amsthm,mathtools}
+        \usepackage{microtype}
+        \usepackage{bm}
+        \newcommand{\lam}{\lambda}
+        \newcommand{\muD}{\mu}
+        \newcommand{\cRate}{c}
+        \newcommand{\rhoS}{\rho}
+        \newcommand{\tmrca}{t_{\mathrm{mrca}}}
+        \newcommand{\torig}{t_{\mathrm{or}}}
+---
+
+# Birth–death (BD) trees vs. the coalescent: pros and cons
+
+### Pros of BD
+1. **Direct epidemiological/macroevolutionary interpretability:** BD estimates $\lam$ (transmission/speciation) and $\muD$ (recovery/extinction) and can incorporate through-time sampling via $\cRate$ (fossil/past sampling rate) and $\rhoS$ (present-day sampling probability).
+2. **Naturally handles heterochronous data.**
+3. **Enables constrained simulation and rigorous likelihoods for given trees.**
+
+### Cons / Cautions
+1. **Stronger structural assumptions** (constant rates, homogeneous sampling).
+2. **Likelihoods require conditioning** (on $n$, $\tmrca$, or $\torig$) to be well-defined.
+3. **Death/extinction rates may be weakly identified** without sufficient through-time samples.
+
+# “Pruning” and the sampled (reconstructed) tree
+
+A sampled tree is obtained by removing all lineages that have no sampled descendants and suppressing the resulting degree-2 vertices. This yields the oriented, time-labeled tree used for inference (cf. Fig. 1 in Stadler, 2010).
+
+# Lemma 2.3: the binomial identity
+
+For $0<a<1$ and $n\in\mathbb{N}$,
+$$
+\sum_{N=n}^\infty \binom{N}{n} a^N
+= a^n \sum_{k=0}^\infty \binom{n+k}{n} a^k
+= \frac{a^n}{(1-a)^{n+1}},
+$$
+by the negative-binomial expansion $\big(1-a\big)^{-(n+1)}=\sum_{k\ge0}\binom{n+k}{n}a^k$.  
+A similar manipulation gives
+$$
+\sum_{N=n}^\infty \binom{N}{n} a^N N \;=\; \frac{a^n}{(1-a)^n}.
+$$
+
+# Master equations and their origin
+
+Let $p_0(t)$ be the probability that a lineage alive at time $t$ before present leaves no sampled (past or present) descendants. Let $p_1(t)$ be the probability it leaves exactly one sampled present-day descendant and no sampled past descendant. Over a small interval $[t,t+h]$,
+$$
+\begin{aligned}
+p_0(t{+}h) &= \big(1-(\lam+\muD+\cRate)h\big)p_0(t)
++ \lam h\,p_0(t)^2 + \muD h + o(h),\\
+p_1(t{+}h) &= \big(1-(\lam+\muD+\cRate)h\big)p_1(t)
++ 2\lam h\,p_0(t)p_1(t) + o(h),
+\end{aligned}
+$$
+yielding the ODEs
+$$
+\dot p_0=\muD-(\lam+\muD+\cRate)p_0+\lam p_0^2,\quad p_0(0)=1-\rhoS,
+$$
+$$
+\dot p_1=-(\lam+\muD+\cRate)p_1+2\lam p_0 p_1,\quad p_1(0)=\rhoS.
+$$
+
+# How to solve Theorem 3.1
+
+The $p_0$ equation is a Riccati with constant coefficients:
+$$
+\dot p_0=\lam(p_0-\alpha_-)(p_0-\alpha_+),
+\quad
+\alpha_{\pm}=\frac{\lam+\muD+\cRate\pm \sqrt{(\lam-\muD-\cRate)^2+4\lam\cRate}}{2\lam}.
+$$
+Separating variables and integrating gives
+$$
+\frac{p_0(t)-\alpha_-}{p_0(t)-\alpha_+}
+=\frac{p_0(0)-\alpha_-}{p_0(0)-\alpha_+}\,e^{c_1 t},
+\quad c_1=\sqrt{(\lam-\muD-\cRate)^2+4\lam\cRate},
+$$
+hence an explicit (logistic-type) $p_0(t)$ after imposing $p_0(0)=1-\rhoS$.  
+Then $p_1$ solves a linear ODE with known coefficient
+$\dot p_1=\big(-(\lam+\muD+\cRate)+2\lam p_0(t)\big)p_1$,
+giving
+$p_1(t)=\rhoS \exp\!\big(\int_0^t -(\lam+\muD+\cRate)+2\lam p_0(s)\,ds\big)$.  
+Stadler rewrites this in terms of an auxiliary function $q(t)$ so that $p_1(t)=4\rhoS/q(t)$.
+
+# Why Theorem 3.5 is key and how it is derived
+
+Define $g_e(t)$ as the “edge-wise” density for edge $e$ at time $t$.  
+Along edges, $g_e$ satisfies the same linear ODE as $p_1$, whereas at nodes we apply multiplicative boundary conditions:
+
+- **bifurcation (time $x_i$):** multiply by $\lam$ and split into two descendants;
+- **sampled extinct leaf at time $y_j>0$:** multiply by $\cRate\,p_0(y_j)$;
+- **sampled present-day leaf:** multiply by $\rhoS$;
+- **sampled ancestors** contribute factors of $\cRate$.
+
+Telescoping the $q(\cdot)$ terms across edges and nodes yields the closed-form likelihood
+$$
+f\!\big[T^{\mathrm{or}}\mid \torig=x_0\big]
+=\lam^{n+m-1}\,\cRate^{k+m}\,(4\rhoS)^n
+\prod_{i=0}^{n+m-1}\frac{1}{q(x_i)}
+\prod_{j=1}^{m} p_0(y_j)\,q(y_j),
+$$
+with notation as in Stadler’s figure: $x_0=\torig$, $\{x_i\}$ are bifurcation times, $\{y_j\}$ are past sampling times, $n$ sampled extant, $m$ sampled extinct (no descendants), and $k$ sampled ancestors.
+
+# Conditioning and the $1/(n\lam)$ weight
+
+Conditioning on $n>0$ extant samples requires integrating over $x_0$ under an improper uniform prior on $\torig$; one obtains
+$\int_0^\infty f[n\mid \torig]\, d\torig = 1/(n\lam)$.  
+Hence, when using the $n$-conditioned tree prior in Bayesian inference, the correct target includes a factor $1/(n\lam)$.
+
+# Practical implications
+
+These formulae supply:
+1. a coherent tree prior for BEAST/MrBayes-style inference with heterochronous data;
+2. ML estimators for $(\lam,\muD,\cRate)$ given a sampled tree;
+3. MCMC-based simulation under constraints (fixed $n$, $\tmrca$, or $\torig$).

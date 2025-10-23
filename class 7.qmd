@@ -1,0 +1,97 @@
+---
+title: "Complex Population Dynamics and the Coalescent Under Neutrality — Detailed Summary and Response on Population Structure"
+author: "Kunyang He"
+date: today
+format:
+  html:
+    toc: true
+    number-sections: true
+    toc-depth: 3
+  pdf: default
+execute:
+  echo: false
+  warning: false
+  message: false
+---
+
+## Executive Summary
+
+This document summarizes *Complex Population Dynamics and the Coalescent Under Neutrality* (Volz, 2012) and provides a formal response to the statement: “**This is an important paper that represents the first attempt we have seen to grapple with the issue of population structure.**” :
+
+The paper develops a general coalescent framework for populations whose demographic history is governed by a deterministic, possibly multi-dimensional, nonlinear dynamical system. The central result is that when births (or transmissions) occur at a time- and state-dependent rate $f(t)$ and the population size is $Y(t)$, the instantaneous pairwise coalescent rate is
+
+$$ \lambda_2(t) = \frac{2 f(t)}{Y(t)^2}, $$
+
+and for $A$ contemporaneous lineages,
+
+$$ \lambda_A(t) = {A \choose 2} \frac{2 f(t)}{Y(t)^2}. $$
+
+This departs from the classical $1/Y(t)$ dependence and shows that **coalescent rates depend on both size and birth/incidence dynamics**, which explains why skyline-based estimates of effective size $N_e$ can be seriously biased when incidence is not strictly proportional to prevalence. The framework is then generalized to **structured populations** (multiple “states” or demes) with *time-varying* birth and migration matrices, allowing births **across** demes and accommodating large sample fractions and heterochronous sampling. The paper also provides (i) an algorithm to **simulate** coalescent trees conditional on complex dynamics and (ii) an **exact likelihood** for genealogies under these models. :
+
+## Key Contributions
+
+1. **Closed-form coalescent rate under non-constant birth rates:** $\lambda_2(t)=2f(t)/Y(t)^2$; $\lambda_A(t)$ scales with ${A \choose 2}$. This result is re-derived from first principles (Cannings-type logic), linking variance in offspring per birth event to genealogy. :.[oaicite:2]{index=2}  
+2. **Explains bias in skyline $N_e$ estimates:** When incidence scales as $Y^{1+a}$, “faster-than-exponential” (FTE; $a>0$) or “slower-than-exponential” (STE; $a<0$) growth breaks the linear link between $\lambda_2$ and $1/Y$, biasing skyline plots (underestimation in FTE, overestimation in STE). See *Figure 1* (PDF p. 5) and *Figure 2* (PDF p. 6).   
+3. **Deterministic approximation for the number of lineages through time (NLFT):** $\tfrac{d}{ds}A(s)\approx -{A(s)^2 b}/{Y^{1-a}(s)}$ for pure-birth examples, plus an “epidemic transformation” $m(A)$ that linearizes exponential growth heuristics (Eq. 23; *Figure 3*, PDF p. 7).  
+4. **General structured-coalescent with time/state-dependent births and migrations:** Uses birth matrix $F(t)$ and migration matrix $G(t)$ to allow reproduction within and **across** demes; two lineages in different demes can coalesce without an explicit migration event (contrasting with classical island models). Derives pairwise coalescent rate $\tilde\lambda_{ij}$ (Eq. 41), branch-state master equation (Eq. 42), and post-coalescent state update (Eq. 43). 
+5. **“Invisible transmission” states:** Introduces state changes along lineages when transmissions are not ancestral to more than one sampled descendant—critical for epidemics with stage-structured infectivity (illustrated in *Figure 4*, PDF p. 9). 
+6. **Efficient simulation and likelihood:** Event-time sampling with total rate $\Lambda_A(s)=\sum l_{ij}/2 + \sum v_i$ (Eq. 52), and an **exact genealogy likelihood** (Eq. 55) using survival terms; computational simplifications via ODEs for state counts $A_k$ (Eq. 56) and representative state vectors $p_k^*$ (Eq. 57). Validation via forward-simulations and likelihood profiles (*Figures 5–6*, PDF pp. 13–14). 
+## Technical Core
+
+### Modeling Assumptions and Derivation
+
+- Population is large enough for a deterministic ODE approximation (Kurtz limit), with asynchronous births and deaths; death rates $\mu(t,Y)$ drop out of the coalescent rate, which depends on **birth** dynamics $f(t,Y)$. 
+- Summing over births backward in time and using Cannings-like variance yields the cumulative hazard $L_2(s)=\int_0^s 2f(t)/Y^2(t)\,dt$, hence $\lambda_2(t)=2f(t)/Y^2(t)$; generalizes to $\lambda_A(t)$. 
+
+### Effective Size and Skyline Bias
+
+- Toy SIS/SIRS-like system with incidence $f\propto Y^{1+a}$ shows that $\lambda_2$ is proportional to $Y^{-2+a}$, whereas the classical assumption $\lambda_2'\propto 1/Y$ only holds when $a=0$. The ratio $r_\lambda=\lambda_2 / \lambda_2' = 2\beta (X/N) Y^{-a}$ varies with both susceptibles and $Y$, breaking proportionality except in early exponential growth. *Figure 1* (PDF p. 5) visualizes this; *Figure 2* (PDF p. 6) shows skyline under/overestimation under FTE/STE. 
+- Consequence: skyline $\hat N_e$ estimates the harmonic mean of $Y^{1-a}/(2\beta)$, not $Y$, within internode intervals (Eq. 21). 
+
+### NLFT and Heuristics
+
+- Deterministic NLFT equation: $\frac{d}{ds}A(s)=-{A(s)\choose 2}\,\frac{2 f(s)}{Y^2(s)}$. Under exponential growth, closed-form $A(s)$ (Eq. 22) and the “epidemic transformation” $m(A)$ (Eq. 23) justify linear heuristics for detecting exponential growth (*Figure 3*, PDF p. 7). 
+
+### Structured Populations (General Framework)
+
+- States/demes $k=1,\ldots,m$. Birth matrix $F(t)=[f_{kl}(t)]$ allows reproduction from $k\to l$; migration matrix $G(t)=[g_{kl}(t)]$ allows state changes independent of birth. Population sizes solve
+
+ $$ \frac{d}{dt}Y_k(t) = h_k(t) - \mu_k(t) + \sum_{l=1}^m \big(f_{lk}(t) + g_{lk}(t) - g_{kl}(t)\big). $$
+
+  **Distinctive features vs. classical structured coalescent:** (i) potentially large sample fractions; (ii) rates are arbitrary functions of time and state; (iii) **coalescence across demes without explicit migration first** (birth across demes). 
+
+- Pairwise coalescent rate (Eq. 41):
+
+ $$ \tilde\lambda_{ij} = \sum_k \sum_l \frac{f_{kl}}{Y_k Y_l}\Big(p_{ik}p_{jl} + p_{il}p_{jk}\Big). $$
+
+- Branch-state master equation (Eq. 42) captures **migration** and **invisible transmission** (state change when a birth event is not ancestral to multiple sampled descendants). Post-coalescent state probabilities are updated by Eq. 43. 
+
+- Worked examples: (a) **Two-stage infection** with stage-specific transmission and progression (Eqs. 29–31; *Figure 4*, PDF p. 9); (b) **Age-structured hosts** with cross-age transmission matrix (Eqs. 32–33). 
+
+### Simulation and Likelihood
+
+- **Simulation:** Draw waiting times from cumulative rate of (coalescence + state changes) (Eq. 52); at events, update topology and states using $\tilde\lambda_{ij}$ and transition rates. :.[oaicite:16]{index=16}  
+- **Likelihood of a labeled, heterochronously sampled genealogy:** For each internode interval, survival term $u(s)=\exp\{-\int L\!(s')ds'\}$ with total coalescent rate $L\!(s)=\sum_{i<j}\tilde\lambda_{ij}(s)$; the interval density is $L\!(s)u(s)$ and event allocation is $\tilde\lambda_{ij}(s)/L\!(s)$. Multiplying over events gives Eq. 55. Computational shortcuts avoid scaling with sample size by evolving $A_k$ and $p_k^*$ (Eqs. 56–59). Validation appears in *Figures 5–6* (PDF pp. 13–14). 
+
+## Visual Highlights (by PDF page)
+
+- **Figure 1 (p. 5):** Coalescent rate $\lambda_2=f/Y^2$ vs. $1/Y$ under exponential, FTE, and STE growth; divergence explains skyline bias. :
+- **Figure 2 (p. 6):** Simulated trees and skyline estimates; FTE yields node heights concentrated near tips (not necessarily “star-like”), while STE produces more star-like trees than exponential. 
+- **Figure 3 (p. 7):** NLFT and transformed NLFT under near-exponential growth; epidemic transformation becomes asymptotically linear.  
+- **Figure 4 (p. 9):** Colored genealogy for two-stage infections illustrating invisible transmission/state changes along branches.   
+- **Figure 5 (p. 13):** Agreement between forward-time simulations and the coalescent simulator across sample fractions and transmission-stage ratios. 
+- **Figure 6 (p. 13–14):** Likelihood profiles for birth rates in a five-state model; MLEs near the truth and reasonable confidence intervals. 
+
+## Limitations and Scope
+
+- **Neutrality and large-population limit:** Selection is not modeled; ODE approximation assumes large $Y(t)$. 
+- **Dependence on prior demographic information:** Accuracy improves when external data constrain $Y(t)$ and $f(t)$ (e.g., surveillance incidence/prevalence), especially under large sampling fractions (discussed explicitly in the paper).  
+- **Model misspecification risk:** While skyline bias is clarified, complex compartmental models also import inductive bias if compartments or rates are mis-specified. 
+
+
+## Response to the Reviewer Statement
+
+> “**This is an important paper that represents the first attempt we have seen to grapple with the issue of population structure.**”
+
+**Response.** We agree that the paper is important, particularly for epidemics where reproduction (transmission) and migration are time- and state-dependent. However, if “population structure” is understood in the broad, classical sense, this is **not literally the first** treatment: structured coalescent frameworks for subdivided populations predate this work and are acknowledged in the paper’s own references (e.g., Beerli & Felsenstein 1999, 2001; Bahlo & Griffiths 2000). What is novel here is that the author **extends** coalescent theory to a *general class of birth–death-driven, structured populations* with (i) potentially large sampling fractions, (ii) arbitrary time- and state-dependent birth/migration rates, and (iii) coalescence that may occur **across demes without a preceding migration**—features that are crucial for phylodynamics of infectious diseases. The paper also derives an **exact genealogy likelihood** and a **simulation algorithm** under those assumptions. In this specific and practically relevant sense, it is among the **first** to grapple rigorously with population structure **as it arises in dynamic epidemic systems with concurrent birth and migration processes**. 
+

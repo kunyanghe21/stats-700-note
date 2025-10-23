@@ -1,0 +1,80 @@
+---
+title: "Viral Phylodynamics"
+author: "Kunyang He"
+format:
+  html:
+    number-sections: false
+    toc: false
+    html-math-method: mathjax
+  pdf:
+    documentclass: article
+    fontsize: 11pt
+    geometry: "a4paper,margin=1in"
+    number-sections: false
+---
+
+## What is Viral Phylodynamics?
+
+The study of how **epidemiological**, **immunological**, and **evolutionary** processes shape viral phylogenies. Because many viruses (esp. RNA viruses) mutate rapidly, tree shapes encode information about transmission intensity, host population structure, immune selection, and intervention effects.
+
+## Three “Tree-to-Process” Heuristics
+
+1. **External vs. internal branch lengths → population size change.**  
+   Rapid expansion produces “star-like” trees with long external branches; near-constant size yields relatively longer internal branches.
+2. **Clustering on the tree → host population structure.**  
+   Geographic or risk-group assortative mixing produces clades enriched for those attributes.
+3. **Tree balance → directional selection (notably immune escape).**  
+   Persistent immune selection tends to yield an imbalanced, ladder-like trunk with short-lived side branches (classic for H3N2 HA).
+
+## Core Applications
+
+- **Dating origins & MRCA** with molecular clocks; early TMRCA aided 2009 H1N1 \(R_0\) estimation.
+- **Inferring spread & \(R_0\).** Growth rate \(r\) from genealogy + infectious period/serial interval \(D\) gives
+
+$$
+r \approx \frac{R_0 - 1}{D}.
+$$
+
+- **Phylogeography.** Treat location (or other attributes) as a discrete trait to estimate migration rates and reconstruct ancestral states; test clustering by tip-label permutations.
+- **Evaluating control.** Time-varying substitution rates/diversity can reflect intervention effects (e.g., ART in HIV; vaccine impact on HBV diversity).
+
+## Methods: From Trees to Processes
+
+- **Bayesian phylogenetics + molecular clocks** to co-estimate trees, dates, and demographic histories while integrating uncertainty.
+- **Coalescent links to epidemiology.** For neutral, size-varying populations,
+
+$$
+\lambda_n(t) = \binom{n}{2}\frac{1}{N(t)} .
+$$
+
+  In an SIR model with transmission rate \(\beta\), recovery rate \(c\), prevalence \(I(t)\) and susceptible fraction \(S(t)\),
+
+$$
+\lambda_n(t) = \binom{n}{2}\,\frac{2\,\beta\,S(t)}{I(t)} ,
+$$
+
+  so early in an epidemic (\(S\approx 1\)), genealogical signals track prevalence.
+
+- **Birth–death (sampling-through-time)** models as an alternative to the coalescent for rapidly changing epidemics.
+- **Phylogeography** as a CTMC over discrete locations (or hosts), estimating a geographic transition matrix; assess structure via randomization tests.
+- **Simulation & ABC.** For complex mechanisms (cross-immunity, seasonality, multi-host, age structure), simulate sequences/trees and fit with Approximate Bayesian Computation using tree-based summary statistics.
+
+## Canonical Case Studies
+
+**Influenza A/H3N2 (HA).** Ladder-like trunk, short side branches; positive selection concentrated on epitope sites; global circulation maintained by serial seeding between regions; models reproduce patterns via selective sweeps and/or transient broad immunity.
+
+**HIV.** Star-like early trees reflect explosive growth; between-host phylogenies only weakly shaped by immune selection due to tight transmission bottlenecks and early transmission; ART can drive substitution rates towards zero within hosts.
+
+## Pitfalls & Good Practice
+
+- Many-to-one mappings: similar tree shapes can arise from different processes (e.g., selection vs. serial bottlenecks).
+- Sampling bias affects \(R_0\) and migration inferences.
+- Integrate multiple data streams (incidence, metadata) and perform sensitivity analyses/model checks.
+
+## Minimal Phylodynamic Workflow
+
+1. Curate sequences + rich metadata (time, place, host traits).
+2. Build time-scaled trees (test clock signals).
+3. Choose an inferential frame: coalescent, birth–death, structured models.
+4. Test structure (tip permutations), estimate migration, growth, \(R_0\).
+5. Validate with simulation/ABC; report uncertainty and sampling sensitivity.

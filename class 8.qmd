@@ -1,0 +1,145 @@
+---
+title: "Bayesian Phylodynamic Inference of Multitype Population Trajectories — Structured Summary & Commentary"
+author: "Kunyang He"
+date: "2025-10-23"
+format:
+  html:
+    toc: true
+    toc-depth: 3
+    number-sections: true
+---
+
+## Abstract
+
+This Quarto document summarizes and comments on *Bayesian Phylodynamic Inference of Multitype Population Trajectories Using Genomic Data* (Vaughan & Stadler, 2025), an MBE Methods article that introduces a practical way to **jointly infer type-specific population size trajectories** together with trees and parameters under **linear multitype birth–death (BD) models**. The paper shows how to: (1) sample trees and parameters by standard MCMC, (2) stochastically map ancestral types on the tree, and (3) **particle-filter** multitype trajectories conditional on the edge-typed tree—achieving minimal overhead relative to conventional multitype BD analyses. The method is implemented in **BDMM-Prime** (BEAST 2), validated by simulation, and applied to **MERS-CoV** genomes to quantify host-specific prevalence and camel→human spillovers in the **full population**, not just along sampled lineages. 
+
+---
+
+## 1. Paper at a Glance
+
+- **Citation**: Vaughan TG, Stadler T (2025). *Bayesian Phylodynamic Inference of Multitype Population Trajectories Using Genomic Data*, *Molecular Biology and Evolution*, 42:1–14, msaf130. (MBE Methods) 
+- **Core idea**: Efficient **posterior imputation** of multitype population trajectories under linear multitype BD models, building on BDMM (Kühnert et al., 2016) with **stochastic mapping** + **particle filtering**.  
+- **Software**: **BDMM-Prime** package for BEAST 2; open source (GPLv3) with manual & tutorial. (Implementation section) 
+
+---
+
+## 2. What’s New and Why It Matters
+
+### 2.1 Contribution
+
+Earlier multitype BD methods typically **integrated over** population trajectories to reduce computation, preventing direct inference of **type-specific prevalence or species richness through time**. This paper provides a way to sample those **latent trajectories** with *little extra cost* beyond standard multitype BD MCMC, enabling **host/trait-specific trajectory estimation** and event accounting (e.g., spillovers) in the *whole* population, not only along sampled ancestry. (Abstract & Introduction) :
+
+### 2.2 Key insight
+
+Factorize the posterior and **condition trajectory sampling on an edge-typed tree**:
+
+$$
+P(E, T^C, \eta, \sigma \mid A, S) = P(E \mid T^C,\eta)\; P(T^C \mid T,\eta)\; P(T,\eta,\sigma \mid A,S),
+$$
+
+then:
+
+1. Sample $T,\eta,\sigma$ by standard BDMM MCMC,  
+2. **Stochastic map** ancestral types to get $T^C$,  
+3. **Particle-filter** the trajectory $E$ given $T^C,\eta$. (Eq. 1; enumerated steps on p. 4) 
+
+---
+
+## 3. Model and Inference Workflow
+
+### 3.1 Model class: linear multitype birth–death with sampling
+
+Individuals belong to one of $d$ types; per-type **birth, death, migration, sampling** (with removal/non-removal) are allowed, and **piecewise-constant** through time. Synchronous sampling events are supported. Table 1 (p. 2) defines notation, including reactions and auxiliary functions such as per-type population sizes $N_i(t)$, per-type lineage counts $K_i(t)$, and cumulative samples $S_i(t)$. 
+
+> **Visual reference**: *Figure 1 on page 4* depicts how the tip-typed tree $T$, the **edge-typed** tree $T^C$, and functions $K(t), S(t), N(t)$ align over 
+
+### 3.2 Stochastic mapping of ancestral types
+
+Given a tip-typed tree $T$ and parameters $\eta$, the ancestral type along each edge evolves as a **time-inhomogeneous CTMC** with rates:
+
+$$
+Q^e_{ij}(t) \;=\; \lambda_{ij}\,p_i(t) + m_{ij} \quad \times\quad \frac{g^e_j(t)}{g^e_i(t)},
+$$
+
+where $g^e_i(t)$ is a **partial tree probability** and $p_i(t)$ the probability a lineage of type $i$ leaves no sampled descendants (ODEs per Kühnert et al., 2016). A postorder integration (to compute $g,h$) followed by a preorder simulation yields a realization of $T^C$. (Eqs. (5), (9)–(11); Algorithm 1 on pp. 5–6) 
+
+### 3.3 Particle filtering of multitype trajectories
+
+Naïve importance sampling of $E$ given $T^C$ fails because tree event times are measure‑zero under the unconditional process. The authors construct an **importance distribution** $P^\*(E\mid\eta)$ that *forces* tree‑compatible events at observed times and thins unobserved events via event‑specific probabilities $f_r(t)$. The resulting **weight** for a trajectory segment (Eq. (27)) depends on the event likelihoods $f_{r}(t)$ and propensities $A_r(t)$; sequential **resampling** maintains effective sample size. (Eqs. (12)–(27); Algorithm 2 on p. 8) 
+
+> **Methodological note**: Interpreting the weighted distribution as a true conditional *given the whole tree* is discussed with reference to *Markov genealogy processes* (King, Lin & Ionides, 2022), and is explicitly noted in the paper’s particle filtering section (p. 8). 
+
+---
+
+## 4. Validation and Computational Cost
+
+- **Stochastic mapping validation**: For ensembles of simulated three‑type models with a rate shift, **quantile–quantile** comparisons of mapped vs. true edge-typed trees (counts of transitions and per-type edge lengths) show near‑identity (*Figure 2, p. 9*). :contentReference[oaicite:11]{index=11}  
+- **Trajectory sampling validation**: Quantile–quantile plots comparing per‑type population size quantiles across time confirm that the **particle filter** reproduces the true conditional distribution (*Figure 3, p. 10*). :contentReference[oaicite:12]{index=12}  
+- **Cost scaling**: Both components scale **approximately linearly with total edge length**; for trees < 1000 tips, type mapping is typically < 100 ms and trajectory sampling ~1 s with $10^3$ particles—negligible compared with **days** for multitype BD MCMC. (Computational burden, p. 10) 
+
+---
+
+## 5. Case Study: MERS-CoV in Camels and Humans
+
+- **Data**: 274 genomes (100 camel, 174 human); analyzed region 21,001–29,364 to avoid recombination; HKY+Γ substitution, relaxed clock with informative prior. (pp. 10–11)
+- **Model**: Two types (Camel, Human). Reparameterization uses $R_{ij}=\lambda_{ij}/(\mu_i+\psi_i)$, $\delta_i=\mu_i+\psi_i$, and sampling proportion $s_i=\psi_i/(\mu_i+\psi_i)$, with removal on sampling ($r_i=1$); $s_i$ nonzero only between first and last sample of each host. Priors cap extreme $R$ and $s$. (p. 11; Table 2)  
+- **Computation**: Five ~$9\times10^7$-iteration MCMC chains; ESS > 200; stochastic mapping and trajectory sampling on every $10^6$-th state, totaling 410 effectively independent trajectory samples for summarization. (p. 11) 
+
+> **Results (Figure 4, p. 12)**  
+> **(a)** MCC tree with inferred ancestral host types shows a persistent **camel reservoir** producing **repeated spillovers** to humans.  
+> **(b)** Posterior **infected-population trajectories**: camels ~constant; human population shows **spiky outbreaks** consistent with spillovers and limited human‑to‑human chains.  
+> **(c)** Direct simulations from posterior parameters **without conditioning on the tree** blur spillover features—underscoring the tree’s temporal information.  
+> **(d)** **Spillover counts**:  
+> • *On the tree (ancestral to samples)*: median **51**, 95% HPD **[45, 57]**.  
+> • *In the full population*: median **236**, 95% HPD **[143, 421]**.  
+> These differ substantially, illustrating how trajectory inference reveals **events outside the sampled ancestry**. 
+
+---
+
+## 6. Strengths, Limitations, and Appropriate Use
+
+### Strengths
+- **Practical**: Adds trajectory inference with **little extra time** beyond standard BDMM MCMC. (p. 10)  
+- **General within linear multitype BD**: Any number of types; **piecewise-constant** time variation; **synchronous sampling**; **migration**. (pp. 2–4) 
+- **Software availability**: **BDMM-Prime** integrates with BEAST 2 and prior BDMM/BDSKY functionality; open source with documentation. (Implementation, p. 8) 
+
+### Limitations
+- **Model class**: Restricted to **linear** BD (no explicit density dependence). Piecewise-constant rates can approximate, but **cannot fully capture** density‑dependent effects (noted by the authors, with recent evidence). (Discussion, p. 13)  
+- **Scale**: Multitype BD MCMC itself remains the **rate‑limiting** step; practical for **hundreds** of tips and few types (though improving methods exist). (p. 13) 
+
+---
+
+## 7. Answer to the Question
+
+> *“This is a recent paper bringing us up-to-date with progress from the Stadler group on phylodynamic inference. The model class generalizes the birth-death models of Stadler (2010) in a similar way to the way Volz (2012) generalized Volz et al. (2009).  
+> The methods involve particle filters, building on previous work by Vaughan et al (2019) that proposes a filter methodology similar to the more complete framework developed by King, Lin & Ionides (2022).”*
+
+**Assessment:**
+
+- **“Recent update from the Stadler group” — Accurate.** The article consolidates and extends multitype BD phylodynamics by enabling **posterior inference of multitype trajectories**, validated and demonstrated on MERS-CoV, and released as BDMM-Prime. 
+
+- **“Model class generalizes Stadler (2010) akin to Volz (2012)→(2009)” — Partially accurate, but imprecise.**  
+  The **model class itself remains the linear multitype BD** of Kühnert et al. (2016) / Scire et al. (2022), with piecewise-constant rates and structured types. The **novelty is inferential**: a strategy to **impute type‑specific population trajectories** conditioned on the edge‑typed tree via **stochastic mapping + particle filtering**, not a new BD model class per se. The paper does **not** frame its advance as a fundamental model generalization analogous to the coalescent generalizations by Volz; rather, it adds a **computationally efficient posterior reconstruction** layer to an existing multitype BD framework. (Sections “New Approaches” and “Bayesian Inference Strategy,” pp. 2–4.) 
+
+- **“Methods involve particle filters building on Vaughan et al. (2019) and related to King, Lin & Ionides (2022)” — Accurate.**  
+  The trajectory sampler is a **particle filter** constructed via a carefully designed importance distribution and **interval-wise resampling**. The paper explicitly connects interpretability of weights **conditioned on the entire tree** to insights from **Markov genealogy processes** (King, Lin & Ionides, 2022). Compared to Vaughan et al. (2019), which used PMMH for (primarily single‑type) joint inference, the present work leverages **standard BDMM MCMC** for $T,\eta$ and then overlays **conditional particle filtering** for $E$. (Particle filtering section, p. 8.) 
+
+**Bottom line**: It’s **best described** as a **methodological advance** (stochastic mapping + particle filtering) that **extends what we can infer** under **existing linear multitype BD models**, rather than a new generalization of the BD model class itself.
+
+---
+
+## 8. Practical Usage Notes (BDMM‑Prime in BEAST 2)
+
+1. **Specify data & types**: Align sequences and assign discrete **types** (e.g., hosts, locations, traits). (Implementation overview) 
+2. **Model**: Choose **multitype BD** with piecewise-constant rates; set migration and sampling, including **synchronous sampling** if applicable.  
+3. **MCMC**: Run standard BDMM inference until ESS is adequate. The BDMM step dominates compute time. (Computational burden) 
+4. **Post‑processing**:  
+   - **Stochastic mapping** to annotate the tree with ancestral types ($T^C$).  
+   - **Particle filtering** to sample multitype trajectories $E$ conditioned on $T^C,\eta$.  
+   Adopt **hundreds–thousands** of particles; segment by observed tree events; monitor effective sample size of weights. (Algorithms 1–2) 
+5. **Summaries**: Plot posterior medians and intervals for $N_i(t)$, and count event types (e.g., spillovers) **in the whole population** vs **on the tree**. (*Figure 4* exemplifies these summaries.) 
+
+---
+
+
+
