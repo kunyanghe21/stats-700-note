@@ -100,7 +100,7 @@ window.Quarto = {
   </ul></li>
   <li><a href="#references-for-convenience" id="toc-references-for-convenience" class="nav-link" data-scroll-target="#references-for-convenience"><span class="header-section-number">7</span> References (for convenience)</a></li>
   </ul>
-<div class="quarto-alternate-formats"><h2>Other Formats</h2><ul><li><a href="class-9.pdf"><i class="bi bi-file-pdf"></i>PDF</a></li></ul></div></nav>
+<div class="quarto-alternate-formats"><h2>Other Formats</h2><ul><li><a href="../class-9.pdf"><i class="bi bi-file-pdf"></i>PDF</a></li></ul></div></nav>
 </div>
 <main class="content" id="quarto-document-content">
 
@@ -136,35 +136,35 @@ window.Quarto = {
 
 
 <blockquote class="blockquote">
-<p><strong>Source</strong>: King, Lin &amp; Ionides (2025), <em>Exact phylodynamic likelihood via structured Markov genealogy processes</em>, arXiv:2405.17032. :contentReference<span data-index="0">oaicite:0</span></p>
+<p><strong>Source</strong>: King, Lin &amp; Ionides (2025), <em>Exact phylodynamic likelihood via structured Markov genealogy processes</em>, arXiv:2405.17032.</p>
 </blockquote>
 <section id="executive-summary" class="level2" data-number="1">
 <h2 data-number="1" class="anchored" data-anchor-id="executive-summary"><span class="header-section-number">1</span> Executive summary</h2>
 <ul>
-<li><p>Starting from a discretely structured, time-inhomogeneous <strong>Markov jump process</strong> (MJP) on the population, the paper constructs a <strong>stochastic process on genealogies</strong> and derives <strong>exact</strong> likelihoods for (i) <em>pruned</em> genealogies (colored by demes) and (ii) <em>obscured</em> genealogies (colors removed). These likelihoods are expressed as solutions of <strong>forward filter equations</strong> whose structure is determined entirely by the population model. :contentReference<span data-index="1">oaicite:1</span></p></li>
-<li><p><strong>Key idea.</strong> Condition on the population history and factor the genealogy likelihood <strong>forward in time</strong> across jump times. A local multiplier <span class="math inline">\(\varphi_u\)</span> (one per jump mark <span class="math inline">\(u\)</span>) is a product of binomial ratios built from: deme occupancy <span class="math inline">\(n(x)\)</span>, event <strong>production</strong> <span class="math inline">\(r_u\)</span>, pruned-lineage count <span class="math inline">\(\ell\)</span>, and <strong>saturation</strong> <span class="math inline">\(s\)</span> (how many emergent lineages belong to the pruned genealogy). :contentReference<span data-index="2">oaicite:2</span></p></li>
-<li><p><strong>Main results.</strong> (i) Conditional-on-history factorization (Theorem&nbsp;1). (ii) Integrating over histories yields a <strong>filter equation</strong> (Theorem&nbsp;2) with an adjoint/backward form. (iii) For obscured genealogies, introduce an auxiliary process over colorings with importance weights; this gives another filter/adjoint pair (Theorems&nbsp;4–6). :contentReference<span data-index="3">oaicite:3</span></p></li>
-<li><p><strong>Algorithms.</strong> Appendix&nbsp;B shows the filters correspond to an event-driven <strong>SMC</strong> (particle filter): simulate the MJP forward, multiply weights at genealogical events, optionally apply between-event decays. Algorithm&nbsp;B1 yields unbiased likelihood estimates. :contentReference<span data-index="4">oaicite:4</span></p></li>
-<li><p><strong>Sanity checks.</strong> The framework specializes to (a) the <strong>Kingman coalescent</strong> (via the Moran model) and (b) the <strong>linear birth–death</strong> model with sampling-through-time (Stadler), reproducing known closed forms. :contentReference<span data-index="5">oaicite:5</span></p></li>
+<li><p>Starting from a discretely structured, time-inhomogeneous <strong>Markov jump process</strong> (MJP) on the population, the paper constructs a <strong>stochastic process on genealogies</strong> and derives <strong>exact</strong> likelihoods for (i) <em>pruned</em> genealogies (colored by demes) and (ii) <em>obscured</em> genealogies (colors removed). These likelihoods are expressed as solutions of <strong>forward filter equations</strong> whose structure is determined entirely by the population model.</p></li>
+<li><p><strong>Key idea.</strong> Condition on the population history and factor the genealogy likelihood <strong>forward in time</strong> across jump times. A local multiplier <span class="math inline">\(\varphi_u\)</span> (one per jump mark <span class="math inline">\(u\)</span>) is a product of binomial ratios built from: deme occupancy <span class="math inline">\(n(x)\)</span>, event <strong>production</strong> <span class="math inline">\(r_u\)</span>, pruned-lineage count <span class="math inline">\(\ell\)</span>, and <strong>saturation</strong> <span class="math inline">\(s\)</span> (how many emergent lineages belong to the pruned genealogy).</p></li>
+<li><p><strong>Main results.</strong> (i) Conditional-on-history factorization (Theorem&nbsp;1). (ii) Integrating over histories yields a <strong>filter equation</strong> (Theorem&nbsp;2) with an adjoint/backward form. (iii) For obscured genealogies, introduce an auxiliary process over colorings with importance weights; this gives another filter/adjoint pair (Theorems&nbsp;4–6).</p></li>
+<li><p><strong>Algorithms.</strong> Appendix&nbsp;B shows the filters correspond to an event-driven <strong>SMC</strong> (particle filter): simulate the MJP forward, multiply weights at genealogical events, optionally apply between-event decays. Algorithm&nbsp;B1 yields unbiased likelihood estimates.</p></li>
+<li><p><strong>Sanity checks.</strong> The framework specializes to (a) the <strong>Kingman coalescent</strong> (via the Moran model) and (b) the <strong>linear birth–death</strong> model with sampling-through-time (Stadler), reproducing known closed forms.</p></li>
 </ul>
 </section>
 <section id="set-up-from-a-population-mjp-to-a-genealogy-process" class="level2" data-number="2">
 <h2 data-number="2" class="anchored" data-anchor-id="set-up-from-a-population-mjp-to-a-genealogy-process"><span class="header-section-number">2</span> Set-up: from a population MJP to a genealogy process</h2>
 <section id="population-process" class="level3" data-number="2.1">
 <h3 data-number="2.1" class="anchored" data-anchor-id="population-process"><span class="header-section-number">2.1</span> Population process</h3>
-<p>Let <span class="math inline">\((X_t)_{t\ge0}\)</span> be a (possibly time-inhomogeneous) MJP on a complete metric space <span class="math inline">\(X\)</span> with transition rate kernel <span class="math inline">\(\alpha(t,x,x')=\sum_{u\in U}\alpha_u(t,x,x')\)</span>, where <span class="math inline">\(U\)</span> is a countable <strong>mark set</strong> (event types). Deterministic-time jumps (e.g., conditioning on sample times) are accommodated via a singular part of the Kolmogorov forward equation. :contentReference<span data-index="6">oaicite:6</span></p>
+<p>Let <span class="math inline">\((X_t)_{t\ge0}\)</span> be a (possibly time-inhomogeneous) MJP on a complete metric space <span class="math inline">\(X\)</span> with transition rate kernel <span class="math inline">\(\alpha(t,x,x')=\sum_{u\in U}\alpha_u(t,x,x')\)</span>, where <span class="math inline">\(U\)</span> is a countable <strong>mark set</strong> (event types). Deterministic-time jumps (e.g., conditioning on sample times) are accommodated via a singular part of the Kolmogorov forward equation.</p>
 </section>
 <section id="demes-and-occupancy" class="level3" data-number="2.2">
 <h3 data-number="2.2" class="anchored" data-anchor-id="demes-and-occupancy"><span class="header-section-number">2.2</span> Demes and occupancy</h3>
-<p>A <strong>deme</strong> index set <span class="math inline">\(\mathcal D\)</span> partitions exchangeable subpopulations (e.g., incubation vs.&nbsp;infectious, strains, severity, behavior). The <strong>deme occupancy</strong> <span class="math inline">\(n:X\to\mathbb{Z}_{\ge0}^{\mathcal D}\)</span> maps a population state <span class="math inline">\(x\)</span> to deme-wise counts (e.g., <span class="math inline">\(n(x)=(E,I)\)</span> in SEIRS). <em>Figure&nbsp;1 (p.&nbsp;4)</em> illustrates SEIRS, two-strain competition, severity progression, and behavioral heterogeneity, highlighting which compartments harbor lineages. :contentReference<span data-index="7">oaicite:7</span></p>
+<p>A <strong>deme</strong> index set <span class="math inline">\(\mathcal D\)</span> partitions exchangeable subpopulations (e.g., incubation vs.&nbsp;infectious, strains, severity, behavior). The <strong>deme occupancy</strong> <span class="math inline">\(n:X\to\mathbb{Z}_{\ge0}^{\mathcal D}\)</span> maps a population state <span class="math inline">\(x\)</span> to deme-wise counts (e.g., <span class="math inline">\(n(x)=(E,I)\)</span> in SEIRS). <em>Figure&nbsp;1 (p.&nbsp;4)</em> illustrates SEIRS, two-strain competition, severity progression, and behavioral heterogeneity, highlighting which compartments harbor lineages.</p>
 </section>
 <section id="genealogy-objects" class="level3" data-number="2.3">
 <h3 data-number="2.3" class="anchored" data-anchor-id="genealogy-objects"><span class="header-section-number">2.3</span> Genealogy objects</h3>
-<p>A genealogy is <span class="math inline">\(G=(T,Z,Y)\)</span>: time <span class="math inline">\(T\)</span>, a c`adl`ag partition-valued tree <span class="math inline">\(Z_t\)</span>, and coloring <span class="math inline">\(Y\)</span> assigning a deme and a node-count along branches. <strong>Pruning</strong> removes extant tips and recursively prunes childless internal nodes; <strong>obscuring</strong> further erases colors. Two local statistics drive the likelihoods: the <strong>lineage count</strong> <span class="math inline">\(\ell(Y_t)\)</span> and <strong>saturation</strong> <span class="math inline">\(s(Y_{t^-},Y_t)\)</span>. <em>(Figures&nbsp;5–6)</em>. :contentReference<span data-index="8">oaicite:8</span></p>
+<p>A genealogy is <span class="math inline">\(G=(T,Z,Y)\)</span>: time <span class="math inline">\(T\)</span>, a c`adl`ag partition-valued tree <span class="math inline">\(Z_t\)</span>, and coloring <span class="math inline">\(Y\)</span> assigning a deme and a node-count along branches. <strong>Pruning</strong> removes extant tips and recursively prunes childless internal nodes; <strong>obscuring</strong> further erases colors. Two local statistics drive the likelihoods: the <strong>lineage count</strong> <span class="math inline">\(\ell(Y_t)\)</span> and <strong>saturation</strong> <span class="math inline">\(s(Y_{t^-},Y_t)\)</span>. <em>(Figures&nbsp;5–6)</em>.</p>
 </section>
 <section id="event-types-and-production" class="level3" data-number="2.4">
 <h3 data-number="2.4" class="anchored" data-anchor-id="event-types-and-production"><span class="header-section-number">2.4</span> Event types and production</h3>
-<p>Pure event types are birth, death, migration, sample, and neutral (compound events allowed under mild restrictions). Define <strong>production</strong> <span class="math inline">\(r_u=(r_{u,i})_{i\in\mathcal D}\)</span>: the number of emergent lineages by deme at a jump with mark <span class="math inline">\(u\)</span> <em>(Figure&nbsp;4)</em>. :contentReference<span data-index="9">oaicite:9</span></p>
+<p>Pure event types are birth, death, migration, sample, and neutral (compound events allowed under mild restrictions). Define <strong>production</strong> <span class="math inline">\(r_u=(r_{u,i})_{i\in\mathcal D}\)</span>: the number of emergent lineages by deme at a jump with mark <span class="math inline">\(u\)</span> <em>(Figure&nbsp;4)</em>.</p>
 </section>
 </section>
 <section id="likelihood-for-pruned-genealogies" class="level2" data-number="3">
@@ -176,7 +176,7 @@ window.Quarto = {
 \]</span> with the natural zero convention when constraints fail. For a jump of mark <span class="math inline">\(u\)</span> producing state <span class="math inline">\(x\)</span> (from some <span class="math inline">\(x'\)</span>), the local factor is <span class="math display">\[
 \varphi_u(x,y^-,y)
 =\Bigg[\prod_{i\in\mathcal D}\frac{\binom{n_i(x)-\ell_i(y)}{\,r_{u,i}-s_i(y^-,y)\,}}{\binom{n_i(x)}{r_{u,i}}}\Bigg]\;Q_u(y^-,y),
-\]</span> where <span class="math inline">\(Q_u\in\{0,1\}\)</span> is a <strong>compatibility indicator</strong> determined by the local genealogy. :contentReference<span data-index="10">oaicite:10</span></p>
+\]</span> where <span class="math inline">\(Q_u\in\{0,1\}\)</span> is a <strong>compatibility indicator</strong> determined by the local genealogy.</p>
 </section>
 <section id="theorem-1-conditional-on-history-factorization" class="level3" data-number="3.2">
 <h3 data-number="3.2" class="anchored" data-anchor-id="theorem-1-conditional-on-history-factorization"><span class="header-section-number">3.2</span> Theorem&nbsp;1 (conditional-on-history factorization)</h3>
@@ -184,7 +184,7 @@ window.Quarto = {
 \mathbb{P}\{P_T=P\mid H_T=H\}
 =\mathbf{1}\{\mathrm{ev}(H)\supseteq \mathrm{ev}(P)\}
 \prod_{t\in \mathrm{ev}(H)}\varphi_{U_t}\!\big(X_t, Y_{t^-},Y_t\big),
-\]</span> i.e., the likelihood <strong>factors forward</strong> over jump times using only local data through <span class="math inline">\(\varphi_u\)</span>. :contentReference<span data-index="11">oaicite:11</span></p>
+\]</span> i.e., the likelihood <strong>factors forward</strong> over jump times using only local data through <span class="math inline">\(\varphi_u\)</span>.</p>
 </section>
 <section id="theorem-2-filter-equation" class="level3" data-number="3.3">
 <h3 data-number="3.3" class="anchored" data-anchor-id="theorem-2-filter-equation"><span class="header-section-number">3.3</span> Theorem&nbsp;2 (filter equation)</h3>
@@ -195,7 +195,7 @@ window.Quarto = {
 \quad t\notin \mathrm{ev}(P),
 \]</span> and at <span class="math inline">\(t\in\mathrm{ev}(P)\)</span>, <span class="math display">\[
 w(t,x)=\sum_u\!\int w(t^-,x')\,\alpha_u(t,x',x)\,\varphi_u\big(x,Y_{t^-},Y_t\big)\,dx'.
-\]</span> The <strong>likelihood</strong> is <span class="math inline">\(L=\int w(T,x)\,dx\)</span>. An adjoint/backward form evolves <span class="math inline">\(F(s,x)\)</span> from <span class="math inline">\(F(T,x)=1\)</span> and yields <span class="math inline">\(L=\int F(0,x)\,p_0(x)\,dx\)</span>. :contentReference<span data-index="12">oaicite:12</span></p>
+\]</span> The <strong>likelihood</strong> is <span class="math inline">\(L=\int w(T,x)\,dx\)</span>. An adjoint/backward form evolves <span class="math inline">\(F(s,x)\)</span> from <span class="math inline">\(F(T,x)=1\)</span> and yields <span class="math inline">\(L=\int F(0,x)\,p_0(x)\,dx\)</span>.</p>
 </section>
 </section>
 <section id="likelihood-for-obscured-genealogies" class="level2" data-number="4">
@@ -204,11 +204,11 @@ w(t,x)=\sum_u\!\int w(t^-,x')\,\alpha_u(t,x',x)\,\varphi_u\big(x,Y_{t^-},Y_t\big
 \beta_u(t,x,x',y,y')=\alpha_u(t,x,x')\,\pi_u(t,x,x',y,y'),
 \quad
 \Psi_u=\frac{\varphi_u(x',y,y')}{\pi_u(t,x,x',y,y')},
-\]</span> a filter on <span class="math inline">\((x,y)\)</span> analogous to the pruned case yields the likelihood of the obscured genealogy <span class="math inline">\(V=(T,Z)\)</span>; an adjoint counterpart is also available (Theorems&nbsp;4–6). This is <strong>importance sampling over colorings</strong> with freedom to design efficient proposals <span class="math inline">\(\pi\)</span>. :contentReference<span data-index="13">oaicite:13</span></p>
+\]</span> a filter on <span class="math inline">\((x,y)\)</span> analogous to the pruned case yields the likelihood of the obscured genealogy <span class="math inline">\(V=(T,Z)\)</span>; an adjoint counterpart is also available (Theorems&nbsp;4–6). This is <strong>importance sampling over colorings</strong> with freedom to design efficient proposals <span class="math inline">\(\pi\)</span>.</p>
 </section>
 <section id="filter-equations-smc" class="level2" data-number="5">
 <h2 data-number="5" class="anchored" data-anchor-id="filter-equations-smc"><span class="header-section-number">5</span> Filter equations &amp; SMC</h2>
-<p>Appendix&nbsp;B formalizes <strong>filter equations</strong> with <strong>boosts</strong> at jumps and optional <strong>decay</strong> between jumps. Lemma&nbsp;B3 shows that augmenting the driver with a weight process <span class="math inline">\(V_t\)</span> (multiplying by boosts at jumps and decaying exponentially) gives <span class="math inline">\(\int w(t,x)\,dx=\mathbb{E}[V_t]\)</span> and leads directly to an <strong>event-driven SMC</strong> implementation (Algorithm&nbsp;B1): simulate the MJP forward; at each genealogical event time do a singular update (reweight and optionally resample); between events accumulate deterministic decay; average weights for an unbiased likelihood estimator. :contentReference<span data-index="14">oaicite:14</span></p>
+<p>Appendix&nbsp;B formalizes <strong>filter equations</strong> with <strong>boosts</strong> at jumps and optional <strong>decay</strong> between jumps. Lemma&nbsp;B3 shows that augmenting the driver with a weight process <span class="math inline">\(V_t\)</span> (multiplying by boosts at jumps and decaying exponentially) gives <span class="math inline">\(\int w(t,x)\,dx=\mathbb{E}[V_t]\)</span> and leads directly to an <strong>event-driven SMC</strong> implementation (Algorithm&nbsp;B1): simulate the MJP forward; at each genealogical event time do a singular update (reweight and optionally resample); between events accumulate deterministic decay; average weights for an unbiased likelihood estimator.</p>
 </section>
 <section id="special-cases" class="level2" data-number="6">
 <h2 data-number="6" class="anchored" data-anchor-id="special-cases"><span class="header-section-number">6</span> Special cases</h2>
@@ -218,18 +218,17 @@ w(t,x)=\sum_u\!\int w(t^-,x')\,\alpha_u(t,x',x)\,\varphi_u\big(x,Y_{t^-},Y_t\big
 \log L
 =|B|\log\!\left(\mu\binom{n}{2}\right)
 -\mu\binom{n}{2}\sum_{i=1}^{m}\binom{i}{2}\,s_i,
-\]</span> where <span class="math inline">\(B\)</span> are branch times and <span class="math inline">\(s_i\)</span> are coalescent-interval lengths; inline/Poisson sampling factors appear as additional singular updates. :contentReference<span data-index="15">oaicite:15</span></p>
+\]</span> where <span class="math inline">\(B\)</span> are branch times and <span class="math inline">\(s_i\)</span> are coalescent-interval lengths; inline/Poisson sampling factors appear as additional singular updates.</p>
 </section>
 <section id="linear-birthdeath-with-sampling-through-time" class="level3" data-number="6.2">
 <h3 data-number="6.2" class="anchored" data-anchor-id="linear-birthdeath-with-sampling-through-time"><span class="header-section-number">6.2</span> Linear birth–death with sampling-through-time</h3>
-<p>With per-capita birth <span class="math inline">\(\lambda\)</span>, death <span class="math inline">\(\mu\)</span>, through-time sampling <span class="math inline">\(\psi\)</span>, and bulk sampling probability <span class="math inline">\(\rho\)</span> at <span class="math inline">\(T\)</span>, the adjoint filter admits closed-form solutions coinciding with Stadler (2010), and generalizes to time-varying rates. :contentReference<span data-index="16">oaicite:16</span></p>
+<p>With per-capita birth <span class="math inline">\(\lambda\)</span>, death <span class="math inline">\(\mu\)</span>, through-time sampling <span class="math inline">\(\psi\)</span>, and bulk sampling probability <span class="math inline">\(\rho\)</span> at <span class="math inline">\(T\)</span>, the adjoint filter admits closed-form solutions coinciding with Stadler (2010), and generalizes to time-varying rates.</p>
 </section>
 </section>
 <section id="references-for-convenience" class="level2" data-number="7">
 <h2 data-number="7" class="anchored" data-anchor-id="references-for-convenience"><span class="header-section-number">7</span> References (for convenience)</h2>
 <ul>
-<li>King, A.&nbsp;A., Lin, Q., &amp; Ionides, E.&nbsp;L. (2025). <em>Exact phylodynamic likelihood via structured Markov genealogy processes</em>. arXiv:2405.17032. DOI: 10.48550/arXiv.2405.17032. :contentReference<span data-index="17">oaicite:17</span><br>
-</li>
+<li>King, A.&nbsp;A., Lin, Q., &amp; Ionides, E.&nbsp;L. (2025). <em>Exact phylodynamic likelihood via structured Markov genealogy processes</em>. arXiv:2405.17032. DOI: 10.48550/arXiv.2405.17032.</li>
 <li>Vaughan, T.&nbsp;G. &amp; Stadler, T. (2025). Bayesian phylodynamic inference of multitype population trajectories using genomic data. <em>Molecular Biology and Evolution</em>, <strong>42</strong>: msaf130.</li>
 </ul>
 </section>
